@@ -14,7 +14,7 @@ files needed for testing:
 2. hand_localizer.py
 3. ASL_classifier/
 
-# how to run video_to_frame.py
+# How to run video_to_frame.py
 modify main(), first argument of FrameCapture() should be your video file, second argument should be the folder where you want to store the extracted frames
 ```
 if __name__ == '__main__':
