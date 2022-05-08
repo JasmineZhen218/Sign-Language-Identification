@@ -1,10 +1,6 @@
-#!/usr/bin/env python
 import warnings
 warnings.filterwarnings("ignore")
 
-"""
-IMPORTS 
-"""
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
