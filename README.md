@@ -108,6 +108,7 @@ python rf.py --file_path your_file_path
 
 ### CNN
 ```
+cd ASL_classfier
 python cnn.py --file_path your_file_path 
 ```
 Addtional tunable parameters
