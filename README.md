@@ -32,7 +32,7 @@ then run the file using
 ```
 dir = "/content/drive/MyDrive/ML_final/Sign_MNIST"
 ```
-To the local directory containing the files in Sign_MNIST.
+To the local directory containing the files in Sign_MNIST. 
 
 2. Run the file using
 ```
