@@ -31,37 +31,24 @@ then run the file using
   # load model
   new_gr = GestureRecognizer.load_model(name = "/content/drive/MyDrive/Sliding_window/sign_detector.pkl.gz") # automatic dict unpacking 
   
-  # specify dataset
+  # specify your own dataset
   userlist=[ 'user_3','user_4','user_5','user_6','user_7','user_9','user_10']
   user_te = userlist[-2:]
   data_directory = '/content/drive/MyDrive/ML_final/Sliding_window/'
 
   data = []
-  list_ = []
   for user in user_te:
     # load image data
     data.extend(glob.glob(data_directory+user+'/'+'/*.jpg'))
-    # load ground truth
-    list_.append(pd.read_csv(data_directory+user+'/'+user+'_loc.csv',index_col=None,header=0))
-  g_truth = pd.concat(list_, ignore_index=True)
-  a,b = g_truth.shape
-    
-  overlap_percent = []
+
   ran_list = []
   for i in range(0,20):
     x = random.randint(0,a)
     ran_list.append(x)
 
   for i in ran_list:
-    y = []
     z = io.imread(data[i])
     z = np.array(z)
-    rows = g_truth.loc[i]
-    y.append(rows['top_left_x'])
-    y.append(rows['top_left_y'])
-    y.append(rows['bottom_right_x'])
-    y.append(rows['bottom_right_y'])
-    # predict hand location
     x = new_gr.recognize_gesture(np.array(z))
 ```
 then run the file using 
