@@ -27,6 +27,18 @@ then run the file using
 !python video_to_frame.py
 ```
 
+# How to run handClassification.py
+1. Change the line 
+```
+dir = "/content/drive/MyDrive/ML_final/Sign_MNIST"
+```
+To the local directory containing the files in Sign_MNIST.
+
+2. Run the file using
+```
+!python handClassification.py
+```
+
 # How to run hand_localizer.py
 
 1. modify the train function:
