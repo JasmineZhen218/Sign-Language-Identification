@@ -5,43 +5,66 @@ A project of CS601.475 Machine Learning (JHU) that aims to recognize alphabetic 
 
 # How to run hand_localizer.py
 
-modify the main function:
+1. modify the train function:
 ```
-  # load the binary classifier for hand detection using this line
-  handDetector = loadClassifier('./handDetector.pkl')
-  # load the nulticlass classifier for ASL recigniztion using this line
-  signDetector = loadClassifier('./signDetector.pkl')
-
-  # load the model using this line, the input argument is the directory storing the datasets
+# initialize model
   gs = GestureRecognizer('/content/drive/MyDrive/ML_final/Sliding_window/')
-  userlist=[ 'user_3',
-        'user_4','user_5','user_6','user_7','user_9','user_10']
 
-  # set the training data and testing data
-  user_tr = userlist[:1]
-  user_te = userlist[-1:]
+  # specify dataset
+  userlist=[ 'user_3','user_4','user_5','user_6','user_7','user_9','user_10']
+  user_tr = userlist[:2]
   
-  # train the model
+  # train model
   gs.train(user_tr)
   
-  # save trained model
+  # save model to directory
   gs.save_model(name = "sign_detector.pkl.gz", version = "0.0.1", author = 'Gill')
-  
-  # load saved model
-  new_gr = GestureRecognizer.load_model(name = "/content/drive/MyDrive/Sliding_window/sign_detector.pkl.gz") # automatic dict unpacking
-  print (new_gr.label_encoder)
-  print (new_gr.signDetector) 
-
-  # use model to test on new test data
-  data = glob.glob('/content/drive/MyDrive/Dataset/user_10'+'/*.jpg')
-  for i in range(240):
-    z = io.imread(data[i])
-    z = np.array(z)
-    print (z.shape) 
-    new_gr.recognize_gesture(np.array(z))
+  print ("The GestureRecognizer is saved")
 ```
 
 then run the file using 
 ```
-!python hand_localizer.py
+%run hand_localizer.py train
+```
+2. modify the test function:
+```
+  # load model
+  new_gr = GestureRecognizer.load_model(name = "/content/drive/MyDrive/Sliding_window/sign_detector.pkl.gz") # automatic dict unpacking 
+  
+  # specify dataset
+  userlist=[ 'user_3','user_4','user_5','user_6','user_7','user_9','user_10']
+  user_te = userlist[-2:]
+  data_directory = '/content/drive/MyDrive/ML_final/Sliding_window/'
+
+  data = []
+  list_ = []
+  for user in user_te:
+    # load image data
+    data.extend(glob.glob(data_directory+user+'/'+'/*.jpg'))
+    # load ground truth
+    list_.append(pd.read_csv(data_directory+user+'/'+user+'_loc.csv',index_col=None,header=0))
+  g_truth = pd.concat(list_, ignore_index=True)
+  a,b = g_truth.shape
+    
+  overlap_percent = []
+  ran_list = []
+  for i in range(0,20):
+    x = random.randint(0,a)
+    ran_list.append(x)
+
+  for i in ran_list:
+    y = []
+    z = io.imread(data[i])
+    z = np.array(z)
+    rows = g_truth.loc[i]
+    y.append(rows['top_left_x'])
+    y.append(rows['top_left_y'])
+    y.append(rows['bottom_right_x'])
+    y.append(rows['bottom_right_y'])
+    # predict hand location
+    x = new_gr.recognize_gesture(np.array(z))
+```
+then run the file using 
+```
+%run hand_localizer.py test
 ```
