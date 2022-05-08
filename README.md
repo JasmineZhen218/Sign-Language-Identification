@@ -51,7 +51,7 @@ then run the file using
     z = np.array(z)
     x = new_gr.recognize_gesture(np.array(z))
 ```
-then run the file using 
+then run the file using, you can modify the function to printout the prediction
 ```
 %run hand_localizer.py test
 ```
