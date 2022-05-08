@@ -3,6 +3,17 @@ A project of CS601.475 Machine Learning (JHU) that aims to recognize alphabetic 
 
 ![1BN0$2_{U EPMMPWEX~KAWH](https://user-images.githubusercontent.com/77927150/167261493-a3a6e36a-b8ae-4f97-ba28-2d54457765d8.png)
 
+Training:
+1. video_to_frame.py
+2. binary
+3. hand_localizer.py
+4. multiclass
+
+Testing:
+1. video_to_frame.py
+2. hand_localizer.py
+3. multiclass
+
 # how to run video_to_frame.py
 modify main(), first argument of FrameCapture() should be your video file, second argument should be the folder where you want to store the extracted frames
 ```
