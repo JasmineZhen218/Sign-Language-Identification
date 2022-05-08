@@ -9,9 +9,9 @@ import argparse
 
 ap = argparse.ArgumentParser()
 ap.add_argument('--file_path',help = "The location of the training and validation data.")
-ap.add_argument('--lr',type = float, help = "learning rate.", default = 0.001)
-ap.add_argument('--epochs',type = float, help = "number of epochs", default = 3000)
-ap.add_argument('--batch_size',type = float, help = "batch size", default = 64)
+ap.add_argument('--lr',type = int, help = "learning rate.", default = 0.001)
+ap.add_argument('--epochs',type = int, help = "number of epochs", default = 3000)
+ap.add_argument('--batch_size',type = int, help = "batch size", default = 64)
 args = ap.parse_args()
 
 

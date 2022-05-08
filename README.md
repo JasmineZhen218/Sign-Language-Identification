@@ -7,12 +7,12 @@ files needed for training:
 1. video_to_frame.py
 2. binary
 3. hand_localizer.py
-4. multiclass
+4. ASL_classifier/
 
 files needed for testing:
 1. video_to_frame.py
 2. hand_localizer.py
-3. multiclass
+3. ASL_classifier/
 
 # how to run video_to_frame.py
 modify main(), first argument of FrameCapture() should be your video file, second argument should be the folder where you want to store the extracted frames
@@ -90,4 +90,29 @@ then run the file using
 then run the file using, you can modify the function to printout the prediction
 ```
 %run hand_localizer.py test
+```
+
+# How to run multi-class classifier
+### Baselines
+* SVM
+```
+cd ASL_classfier
+python svm.py --file_path your_file_path 
+```
+
+* Random forest
+```
+cd ASL_classfier
+python rf.py --file_path your_file_path 
+```
+
+### CNN
+```
+python cnn.py --file_path your_file_path 
+```
+Addtional tunable parameters
+```
+--lr learning rate, default = 0.001
+--epoch number of epochs, default = 3000
+--batch_size batch size, default = 64
 ```
