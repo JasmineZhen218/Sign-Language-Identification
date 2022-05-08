@@ -34,30 +34,30 @@ import gzip
 
 import sys
 
-#given a list of filenames return s a dictionary of images 
+# given a list of filenames return s a dictionary of images 
 def getfiles(filenames):
     dir_files = {}
     for x in filenames:
         dir_files[x]=io.imread(x)
     return dir_files
 
-#return hog of a particular image vector
+# return hog of a particular image vector
 def convertToGrayToHOG(imgVector):
     rgbImage = rgb2gray(imgVector)
     return hog(rgbImage)
 
-#takes returns cropped image 
+# returns cropped image 
 def crop(img,x1,x2,y1,y2):
     crp=img[y1:y2,x1:x2]
     crp=resize(crp,((128,128,3)))#resize
     return crp
 
-#save classifier
+# save classifier
 def dumpclassifier(filename,model):
     with open(filename, 'wb') as fid:
         pickle.dump(model, fid)    
 
-#load classifier
+# load classifier
 def loadClassifier(picklefile):
     fd = open(picklefile, 'r+')
     model = pickle.load(fd)
@@ -154,6 +154,7 @@ def overlapping_area(detection_1, detection_2):
     y2_tl = detection_2[1]
     y1_br = detection_1[1] + detection_1[4]
     y2_br = detection_2[1] + detection_2[4]
+    
     # Calculate the overlapping Area
     x_overlap = max(0, min(x1_br, x2_br)-max(x1_tl, x2_tl))
     y_overlap = max(0, min(y1_br, y2_br)-max(y1_tl, y2_tl))
@@ -360,7 +361,6 @@ class GestureRecognizer(object):
         """
             data_directory : path like /home/sanket/mlproj/dataset/    
             includes the dataset folder with '/'
-            Initialize all your variables here
         """
         self.data_directory = data_director
         self.handDetector = None
@@ -386,29 +386,26 @@ class GestureRecognizer(object):
             both binary and multiclass on the given list of users
         """
         print ("Train starts")
+        
         # Load data for the binary (hand/not hand) classification task
         imageset, boundbox, hog_list, label_list = load_binary_data(train_list, self.data_directory)
-
         print ("Imageset, boundbox, hog_list,label_list Loaded!")
 
         # Load data for the multiclass classification task
         X_mul,Y_mul = get_data(train_list, imageset, self.data_directory)
-
         print ("Multiclass data loaded")
-       
-
         Y_mul = self.label_encoder.fit_transform(Y_mul)
-
+        
+        # if no multiclass classifier loaded, use baseline
         if self.handDetector == None:
             # Build binary classifier for hand-nothand classification
             self.handDetector, self.numIt, self.falseNeg = improve_Classifier_using_HNM(hog_list, label_list, boundbox, imageset, threshold=40, max_iterations=35)
-
         print ("hand detector trained ")
-
+        
+        # if no multiclass classifier loaded, use baseline
         if self.signDetector == None:
             svcmodel = SVC(kernel='linear', C=0.9, probability=True)
             self.signDetector = svcmodel.fit(X_mul, Y_mul)
-
         print ("sign detector trained ")
 
         dumpclassifier('handDetector.pkl', self.handDetector)
@@ -422,15 +419,13 @@ class GestureRecognizer(object):
         """
             image : a 320x240 pixel RGB image in the form of a numpy array
 
-            This function should locate the hand and classify the gesture.
-            returns : (position, label)
+            This function should locate the hand.
+            returns : position
 
             position : a tuple of (x1,y1,x2,y2) coordinates of bounding box
                 x1,y1 is top left corner, x2,y2 is bottom right
-
-            label : a single character. eg 'A' or 'B'
         """
-        print ("In recognize_gesture")
+        print ("localizing hand")
         scales = [   1.25,
                  1.015625,
                  0.78125,
@@ -448,17 +443,17 @@ class GestureRecognizer(object):
                  1.484375
             ]
 
-        detectedBoxes = [] ## [x,y,conf,scale]
+        detectedBoxes = []
         for sc in scales:
-            detectedBoxes.append(image_pyramid_step(self.handDetector,image,scale=sc))
+            detectedBoxes.append(image_pyramid_step(self.handDetector, image, scale=sc))
         
         side = [0 for i in list(range(len(scales)))]
         for i in list(range(len(scales))):
             side[i]= 128/scales[i]
 
         for i in list(range(len(detectedBoxes))):
-            detectedBoxes[i][0]=detectedBoxes[i][0]/scales[i] #x
-            detectedBoxes[i][1]=detectedBoxes[i][1]/scales[i] #y
+            detectedBoxes[i][0]=detectedBoxes[i][0]/scales[i] # x coordinate
+            detectedBoxes[i][1]=detectedBoxes[i][1]/scales[i] # y coordinate
 
         nms_lis = [] #[x1,x2,y1,y2]
         for i in list(range(len(detectedBoxes))):
@@ -476,60 +471,50 @@ class GestureRecognizer(object):
         
         croppedImage = crop(image, x_top, x_top+side, y_top, y_top+side)
         hogvec = convertToGrayToHOG(croppedImage)
-
-        prediction = self.signDetector.predict_proba([hogvec])[0]
-        #print(prediction)
-        #print(np.argmax(prediction))
-        #print(position)
+        
+        ## ideally, if we load the multiclass classifier here we can incoporate sign detection into the recognizer
+        # prediction = self.signDetector.predict_proba([hogvec])[0]
+        # print(prediction)
+        # print(np.argmax(prediction))
+        # print(position)
         return position
         
     def save_model(self, **params):
 
         """
-            save your GestureRecognizer to disk.
+            save hand localizer to disk.
         """
-
         self.version = params['version']
         self.author = params['author']
-
         file_name = params['name']
-
         pickle.dump(self, gzip.open(file_name, 'wb'))
-        # We are using gzip to compress the file
-        # If you feel compression is not needed, kindly take lite
 
     @staticmethod       # similar to static method in Java
     def load_model(**params):
         """
-            Returns a saved instance of GestureRecognizer.
-
-            load your trained GestureRecognizer from disk with provided params
-            Read - http://stackoverflow.com/questions/36901/what-does-double-star-and-star-do-for-parameters
+            Returns a saved instance of hand localizer.
         """
-
         file_name = params['name']
         return pickle.load(gzip.open(file_name, 'rb'))
 
-        # People using deep learning need to reinitalize model, load weights here etc.
-
 def train():
-#     #handDetector = loadClassifier('./handDetector.pkl')
-#     #signDetector = loadClassifier('./signDetector.pkl')
-#     # self,data_dir,hand_Detector,sign_Detector
+  
+  # initialize model
   gs = GestureRecognizer('/content/drive/MyDrive/ML_final/Sliding_window/')
-  userlist=[ 'user_3','user_4','user_5','user_6','user_7','user_9','user_10']
 
+  # specify dataset
+  userlist=[ 'user_3','user_4','user_5','user_6','user_7','user_9','user_10']
   user_tr = userlist[:2]
   
+  # train model
   gs.train(user_tr)
-
-  gs.save_model(name = "sign_detector.pkl.gz", version = "0.0.1", author = 'Gill')
   
-
-  print ("The GestureRecognizer is saved to disk")
-
+  # save model to directory
+  gs.save_model(name = "sign_detector.pkl.gz", version = "0.0.1", author = 'Gill')
+  print ("The GestureRecognizer is saved")
+  
+  # load model to plot accuracies
   new_gr = GestureRecognizer.load_model(name = "/content/drive/MyDrive/Sliding_window/sign_detector.pkl.gz") # automatic dict unpacking
-
   x = new_gr.numIt
   y = new_gr.falseNeg
   plt.plot(y)
@@ -540,28 +525,29 @@ def train():
    
 
 def test(): 
+  # load model
   new_gr = GestureRecognizer.load_model(name = "/content/drive/MyDrive/Sliding_window/sign_detector.pkl.gz") # automatic dict unpacking 
   
+  # specify dataset
   userlist=[ 'user_3','user_4','user_5','user_6','user_7','user_9','user_10']
   user_te = userlist[-2:]
   data_directory = '/content/drive/MyDrive/ML_final/Sliding_window/'
+
   data = []
-  #data = glob.glob('/content/drive/MyDrive/ML_final/Sliding_window/user_9'+'/*.jpg')
   list_ = []
   for user in user_te:
+    # load image data
     data.extend(glob.glob(data_directory+user+'/'+'/*.jpg'))
+    # load ground truth
     list_.append(pd.read_csv(data_directory+user+'/'+user+'_loc.csv',index_col=None,header=0))
   g_truth = pd.concat(list_, ignore_index=True)
-  #g_truth = pd.read_csv('/content/drive/MyDrive/ML_final/Sliding_window/user_9/user_9_loc.csv')
-  
-  overlap_percent = []
   a,b = g_truth.shape
-  print(a)
+    
+  overlap_percent = []
   ran_list = []
   for i in range(0,20):
     x = random.randint(0,a)
     ran_list.append(x)
-  print(len(data))
 
   for i in ran_list:
     y = []
@@ -572,6 +558,7 @@ def test():
     y.append(rows['top_left_y'])
     y.append(rows['bottom_right_x'])
     y.append(rows['bottom_right_y'])
+    # predict hand location
     x = new_gr.recognize_gesture(np.array(z))
     overlap_percent.append(overlap(x,y))
   
@@ -584,6 +571,7 @@ def test():
 
 
 if __name__ == '__main__':
+  
   MODE = sys.argv[1]
   if MODE == "train":
     train()
