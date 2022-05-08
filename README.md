@@ -5,7 +5,7 @@ A project of CS601.475 Machine Learning (JHU) that aims to recognize alphabetic 
 
 files needed for training:
 1. video_to_frame.py
-2. binary
+2. handClassification.py
 3. hand_localizer.py
 4. ASL_classifier/
 
