@@ -11,6 +11,10 @@ if __name__ == '__main__':
   FrameCapture("/content/drive/MyDrive/ML_final/IMG_0358.MP4", "/content/drive/MyDrive/ML_final/External_test_data")
   
 ```
+then run the file using 
+```
+!python video_to_frame.py
+```
 
 # How to run hand_localizer.py
 
